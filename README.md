@@ -1,6 +1,6 @@
 # Filmarks 高評価アニメスクレイパー
 
-Filmarks のタグページから評価 4.3 以上のアニメを抽出する Node.js スクレイパーです。デフォルトでは「神アニメ」タグを対象としますが、任意のタグを指定することもできます。
+Filmarks のタグページから指定した評価以上のアニメを抽出する Node.js スクレイパーです。デフォルトでは「神アニメ」タグと評価 4.3 以上を対象としますが、任意のタグや評価基準を指定することもできます。
 
 ## ファイル一覧
 
@@ -11,8 +11,8 @@ Filmarks のタグページから評価 4.3 以上のアニメを抽出する No
 
 ### 結果ファイル
 
-- **`high-rated-anime-urls.txt`** - 評価 4.3 以上のアニメの URL リスト（174 件）
-- **`high-rated-anime-detailed.txt`** - 評価 4.3 以上のアニメの詳細情報（タイトル、評価、URL）
+- **`high-rated-anime-urls.txt`** - 指定した評価以上のアニメの URL リスト
+- **`high-rated-anime-detailed.txt`** - 指定した評価以上のアニメの詳細情報（タイトル、評価、公開日、URL）
 
 ## 使用方法
 
@@ -44,16 +44,12 @@ node filmarks-scraper.js
 
 - アニメタイトル
 - 評価スコア（config.json で指定した最低評価以上）
-- 公開日（YYYY年MM月DD日形式、取得できない場合は「N/A」）
+- 公開日（YYYY 年 MM 月 DD 日形式、取得できない場合は「N/A」）
 - Filmarks のアニメページ URL
 
 ## 設定例
 
-### SFタグで検索
-
-タグは以下を参照して取得
-
-https://filmarks.com/list-anime/tag/
+### SF を検索（評価 4.0 以上）
 
 ```json
 {
@@ -64,6 +60,11 @@ https://filmarks.com/list-anime/tag/
   "requestDelay": 2000
 }
 ```
+
+### 利用可能なタグ
+
+タグは以下の URL から確認できます：
+https://filmarks.com/list-anime/tag/
 
 ## 注意事項
 
