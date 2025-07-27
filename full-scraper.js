@@ -1,4 +1,3 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
 
@@ -6,15 +5,25 @@ async function fetchPage(pageNum) {
   const url = `https://filmarks.com/list-anime/tag/%E7%A5%9E%E3%82%A2%E3%83%8B%E3%83%A1?page=${pageNum}`;
   
   try {
-    const response = await axios.get(url, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'ja,en;q=0.9'
       },
-      timeout: 10000
+      signal: controller.signal
     });
-    return response.data;
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.text();
   } catch (error) {
     console.error(`Error fetching page ${pageNum}:`, error.message);
     return null;
