@@ -73,6 +73,35 @@ function extractAnimeData(html) {
     if ($releaseDate.length && $releaseDate.text().trim()) {
       releaseDate = $releaseDate.text().trim();
     }
+    
+    // Get mark count (視聴済み数) and clip count (観たい数)
+    let markCount = 0;
+    let clipCount = 0;
+    
+    const parentCassette = $cassette.closest('.js-cassette');
+    if (parentCassette.length) {
+      // Extract mark count from data-mark attribute
+      const markData = parentCassette.attr('data-mark');
+      if (markData) {
+        try {
+          const markObj = JSON.parse(markData.replace(/&quot;/g, '"'));
+          markCount = parseInt(markObj.count) || 0;
+        } catch (e) {
+          // If parsing fails, keep markCount as 0
+        }
+      }
+      
+      // Extract clip count from data-clip attribute
+      const clipData = parentCassette.attr('data-clip');
+      if (clipData) {
+        try {
+          const clipObj = JSON.parse(clipData.replace(/&quot;/g, '"'));
+          clipCount = parseInt(clipObj.count) || 0;
+        } catch (e) {
+          // If parsing fails, keep clipCount as 0
+        }
+      }
+    }
 
     // Make sure URL is complete
     if (url && !url.startsWith('http')) {
@@ -84,7 +113,7 @@ function extractAnimeData(html) {
     // Only add if we have all required data and rating is >= minRating
     if (title && rating >= config.minRating && url && !processedUrls.has(url)) {
       processedUrls.add(url);
-      animeList.push({ title, rating, url, releaseDate });
+      animeList.push({ title, rating, url, releaseDate, markCount, clipCount });
     }
   });
 
@@ -132,19 +161,40 @@ async function scrapeAllPages() {
   }
 
   // Release dates are now fetched from the list page, no need for additional requests
+  
+  // Calculate total score for each anime
+  console.log(`\n📊 Calculating comprehensive scores...`);
+  
+  // Find max values for normalization
+  const maxMarkCount = Math.max(...allAnime.map(a => a.markCount));
+  const maxClipCount = Math.max(...allAnime.map(a => a.clipCount));
+  
+  allAnime.forEach(anime => {
+    // Normalize counts to 0-5 scale to match rating scale
+    const normalizedMarkCount = maxMarkCount > 0 ? (anime.markCount / maxMarkCount) * 5 : 0;
+    const normalizedClipCount = maxClipCount > 0 ? (anime.clipCount / maxClipCount) * 5 : 0;
+    
+    // Calculate total score: rating(60%) + markCount(30%) + clipCount(10%)
+    anime.totalScore = (anime.rating * 0.6) + (normalizedMarkCount * 0.3) + (normalizedClipCount * 0.1);
+    
+    // Round to 2 decimal places
+    anime.totalScore = Math.round(anime.totalScore * 100) / 100;
+  });
 
   console.log(`\n${'='.repeat(60)}`);
   console.log(`🎉 FINAL RESULTS: ${allAnime.length} anime with rating >= ${config.minRating}`);
   console.log('='.repeat(60) + '\n');
 
-  // Sort by rating descending
-  allAnime.sort((a, b) => b.rating - a.rating);
+  // Sort by total score descending
+  allAnime.sort((a, b) => b.totalScore - a.totalScore);
 
   // Display results
   if (allAnime.length > 0) {
-    console.log('Top rated anime:\n');
+    console.log('Top anime by comprehensive score:\n');
     allAnime.forEach((anime, index) => {
-      console.log(`${index + 1}. ${anime.title} (★${anime.rating}) - ${anime.releaseDate}`);
+      console.log(`${index + 1}. ${anime.title}`);
+      console.log(`   Score: ${anime.totalScore} (Rating: ★${anime.rating}, Views: ${anime.markCount.toLocaleString()}, Watchlist: ${anime.clipCount.toLocaleString()})`);
+      console.log(`   Release: ${anime.releaseDate}`);
       console.log(`   ${anime.url}\n`);
     });
 
@@ -153,13 +203,13 @@ async function scrapeAllPages() {
     fs.writeFileSync('high-rated-anime-urls.txt', urlList, 'utf8');
 
     const detailedList = allAnime.map((a, i) =>
-      `${i + 1}. ${a.title} (★${a.rating}) - ${a.releaseDate}\n${a.url}`
+      `${i + 1}. ${a.title}\nScore: ${a.totalScore} (Rating: ★${a.rating}, Views: ${a.markCount.toLocaleString()}, Watchlist: ${a.clipCount.toLocaleString()})\nRelease: ${a.releaseDate}\n${a.url}`
     ).join('\n\n');
     fs.writeFileSync('high-rated-anime-detailed.txt', detailedList, 'utf8');
 
     console.log('\n📁 Results saved to:');
     console.log('- high-rated-anime-urls.txt (URLs only)');
-    console.log('- high-rated-anime-detailed.txt (with titles and ratings)');
+    console.log('- high-rated-anime-detailed.txt (with comprehensive scores and details)');
   } else {
     console.log(`No anime found with rating >= ${config.minRating}`);
   }
