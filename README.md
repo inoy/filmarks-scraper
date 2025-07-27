@@ -44,6 +44,7 @@ node full-scraper.js
 
 - アニメタイトル
 - 評価スコア（config.json で指定した最低評価以上）
+- 公開日（YYYY年MM月DD日形式、取得できない場合は「N/A」）
 - Filmarks のアニメページ URL
 
 ## 設定例

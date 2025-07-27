@@ -34,6 +34,7 @@ async function fetchPage(pageNum, tag) {
   }
 }
 
+
 function extractAnimeData(html) {
   const $ = cheerio.load(html);
   const animeList = [];
@@ -62,6 +63,16 @@ function extractAnimeData(html) {
         url = $anyLink.attr('href');
       }
     }
+    
+    // Get release date from the list page
+    let releaseDate = 'N/A';
+    const $releaseDate = $cassette.find('.p-content-cassette__other-info-title').filter((i, elem) => {
+      return $(elem).text().includes('公開日：');
+    }).next('span');
+    
+    if ($releaseDate.length && $releaseDate.text().trim()) {
+      releaseDate = $releaseDate.text().trim();
+    }
 
     // Make sure URL is complete
     if (url && !url.startsWith('http')) {
@@ -73,7 +84,7 @@ function extractAnimeData(html) {
     // Only add if we have all required data and rating is >= minRating
     if (title && rating >= config.minRating && url && !processedUrls.has(url)) {
       processedUrls.add(url);
-      animeList.push({ title, rating, url });
+      animeList.push({ title, rating, url, releaseDate });
     }
   });
 
@@ -120,6 +131,8 @@ async function scrapeAllPages() {
     await new Promise(resolve => setTimeout(resolve, config.requestDelay));
   }
 
+  // Release dates are now fetched from the list page, no need for additional requests
+
   console.log(`\n${'='.repeat(60)}`);
   console.log(`🎉 FINAL RESULTS: ${allAnime.length} anime with rating >= ${config.minRating}`);
   console.log('='.repeat(60) + '\n');
@@ -131,7 +144,7 @@ async function scrapeAllPages() {
   if (allAnime.length > 0) {
     console.log('Top rated anime:\n');
     allAnime.forEach((anime, index) => {
-      console.log(`${index + 1}. ${anime.title} (★${anime.rating})`);
+      console.log(`${index + 1}. ${anime.title} (★${anime.rating}) - ${anime.releaseDate}`);
       console.log(`   ${anime.url}\n`);
     });
 
@@ -140,7 +153,7 @@ async function scrapeAllPages() {
     fs.writeFileSync('high-rated-anime-urls.txt', urlList, 'utf8');
 
     const detailedList = allAnime.map((a, i) =>
-      `${i + 1}. ${a.title} (★${a.rating})\n${a.url}`
+      `${i + 1}. ${a.title} (★${a.rating}) - ${a.releaseDate}\n${a.url}`
     ).join('\n\n');
     fs.writeFileSync('high-rated-anime-detailed.txt', detailedList, 'utf8');
 
