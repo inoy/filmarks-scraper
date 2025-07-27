@@ -1,3 +1,4 @@
 node_modules/
 .idea/
 high-rated-*.txt
+config.json
