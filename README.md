@@ -6,7 +6,7 @@ Filmarks のタグページから評価 4.3 以上のアニメを抽出する No
 
 ### メインスクレイパー
 
-- **`full-scraper.js`** - 本番用のスクレイパー。複数ページから高評価アニメを収集します
+- **`filmarks-scraper.js`** - メインのスクレイパー。複数ページから高評価アニメを収集します
 - **`config.json`** - スクレイパーの設定ファイル
 
 ### 結果ファイル
@@ -37,7 +37,7 @@ npm install
 3. スクレイパーの実行
 
 ```bash
-node full-scraper.js
+node filmarks-scraper.js
 ```
 
 ## 収集データ
