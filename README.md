@@ -15,22 +15,6 @@ Filmarks の「神アニメ」タグから評価 4.3 以上のアニメを抽出
 - **`high-rated-anime-urls.txt`** - 評価 4.3 以上のアニメの URL リスト（174 件）
 - **`high-rated-anime-detailed.txt`** - 評価 4.3 以上のアニメの詳細情報（タイトル、評価、URL）
 
-### 開発・デバッグ用ファイル
-
-- **`filmarks-anime-scraper.js`** - 初期バージョン（HTTPS モジュール使用）
-- **`filmarks-anime-scraper-v2.js`** - 改良版（デバッグ機能追加）
-- **`scraper.js`** - axios/cheerio 版スクレイパー
-- **`debug-scraper.js`** - HTML 構造を解析するためのデバッグツール
-- **`check-pagination.js`** - ページネーション確認ツール
-- **`final-scraper.js`** - 単一ページ用スクレイパー
-- **`debug-page1.html`** - デバッグ用の 1 ページ目の HTML 保存ファイル
-
-### その他
-
-- **`package.json`** - Node.js 依存関係の定義
-- **`anime-urls.txt`** - 初期テスト時の空ファイル
-- **`anime-detailed.txt`** - 初期テスト時の空ファイル
-- **`high-rated-anime.txt`** - 初期テスト時の空ファイル
 
 ## 使用方法
 
